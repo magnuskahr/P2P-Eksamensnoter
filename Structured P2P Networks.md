@@ -36,6 +36,8 @@ When ever a file needs to be stored in the network, it gets given an ID using th
 
 And is then placed at the first node with an id equal or larger then the files.
 
+![](ChordLinear.png)
+
 We have now created a simple and linear network. When a node _n_ joins the network, it gets allocated keys equal to or smaller than itself, from the node which is clockwise to it.
 
 Again, a node _n_ is clockwise to a node _m_ if it is the first which satisfies:
@@ -54,6 +56,8 @@ In the range `1 <= i <= m`, the table of node _n_ will reference the successors 
 > $n + 2^{i-1}$
 
 Well it is simply, the sequence: 1, 2, 4, 8, 16, 32 ... and so on.
+
+![](ChordNonLinear.png)
 
 Now at looktime time, if the successor does not contain the file, the lookup will be propagated to the largest node in the finger table, which has an id smaller than that of the file.
 
