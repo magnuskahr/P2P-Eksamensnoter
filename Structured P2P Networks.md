@@ -69,12 +69,14 @@ But does it contain any problems? Well sure, it is still a bit too simple and do
 
 ## Pastry
 
-Lets look at another p2p system, Pastry. As with Chord, it assign ids to node, but every node now also knows its predecessor.
+Lets look at another p2p system, Pastry, and I’ll explain how routing is done here. As with Chord, it assign ids to node, but every node now also knows its predecessor.
 
 > * **Pastry**
 > * Assigns 128bit hash IDs in a ring
 > * Each node has Leaf Set 
-	* Successors and predecessors ~~plural!~~
+	* Nummerical Successors and predecessors ~~plural!~~
+
+~~I only talk about routing in pastry, hence I do not speak about a neighbour table, which I did not really understand, but is used to keep the network alive by periodically check the table for liveness.~~
 
 ### Routing table
 
