@@ -1,5 +1,7 @@
 # 1. Structured P2P Networks
 
+{{TOC}}
+
 ## Motivation
 ## Structured networks
 ## Chord
@@ -58,11 +60,45 @@ In the range `1 <= i <= m`, the table of node _n_ will reference the successors 
 Well it is simply, the sequence: 1, 2, 4, 8, 16, 32 ... and so on.
 
 ![](ChordNonLinear.png)
-
+	
 Now at looktime time, if the successor does not contain the file, the lookup will be propagated to the largest node in the finger table, which has an id smaller than that of the file.
 
 Thereby, now we have lookup as an `O(log(n))` operation, and to prevent failures, each node will keep its successors table, to be able to rebuild the system.
 
+But does it contain any problems? Well sure, it is still a bit too simple and does not consider locality or strength of peers.
 
 ## Pastry
+
+Lets look at another p2p system, Pastry. As with Chord, it assign ids to node, but every node now also knows its predecessor.
+
+> * **Pastry**
+> * Assigns 128bit hash IDs in a ring
+> * Each node has Leaf Set 
+	* Successors and predecessors ~~plural!~~
+
+### Routing table
+
+Now, I chord every node ended up with a Finger Table. That is not the case here, but every node do have a Routing Table, which is based on Prefix Match
+
+> * routing table -> prefix matching -> O(log(n))!
+
+Say that we have a peer with ID *1010*, it will then maintain neighbor peer with an id matching the following sequence
+
+* *
+* 1*
+* 10*
+* 101*
+
+As we can see, Chord and Pastry are much alike, also functionality wise. At lookup time, if the id falls within the leafset, the job is done, otherwise, the routing table will be used, and lookup will be propagated to the entry with the largest matching prefix.
+
+### Locality
+
+So, does Pastry somehow take into account the locality of nodes? Well if we assume that the 128 bit-space is uniformly distributed, I would like to draw references to a typical tree structure.
+
+![](treeStructure.png)
+
+As we see in the tree, the further down we go, the more nodes are there in a row. Lets imagine these as neighbours, then we have the potential need for larger and larger hops as we go down.
+
+Therefor, in the routing table, the smaller a prefix for a routing is, the smaller jump. Therefor, in Pastry, we expect in the beginning of a query to start with smaller jumps, and as we locate the destination, we should be making larger jumps.
+
 ## Kademlia
