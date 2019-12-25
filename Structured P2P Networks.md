@@ -104,3 +104,23 @@ As we see in the tree, the further down we go, the more nodes are there in a row
 Therefor, in the routing table, the smaller a prefix for a routing is, the smaller jump. Therefor, in Pastry, we expect in the beginning of a query to start with smaller jumps, and as we locate the destination, we should be making larger jumps.
 
 ## Kademlia
+
+Great, we have briefly discussed two different systems now, which both have their problems, the latter, _Pastry_ is seen to have a rather complicated routing algorithm.
+
+Next we will be looking a _Kademlia_, which had a breakthrough I networking, by using the XOR operation to minimize the internode messaging. Another advantage is also, the the Kademlia system prefers long living nodes, since it expects those to also be alive next time they are needed.
+
+Kademlia is built like a binary tree structure - which in itself is the routing table. All identifiers er 160 bit long, found randomly or by SHA1. Each node is then a leaf on the tree, positioned as the shortest unique prefix of its id.
+
+Each node contains a list of what is called _k-buckets_. A node will have a _k-bucket_ for every bit up from its unique prefix. That is, going up in the tree, from the node itself, each time it can go down along a different path, that tree will be called a bucket, and in that (sub)tree, the node will know _k_ of the given nodes in it. If it is known that nodes that have been connected for a long time in a network will probably remain connected for a long time in the future. Because of this statistical distribution, Kademlia selects long connected nodes to remain stored in the k-buckets. 
+
+![](k2bucket.png)
+
+That means, that we know our neighbour hood very well, but in the other half of the system, we only know _k_ nodes.
+
+The further away a bucket is located from a node, the higher the number is given a bucket. That, goes up the tree to find buckets, that are given a name starting from 1 and increasing.
+
+![](k2bucketNaming.png)
+
+Why is that important you ask? Well, it is at lookup time. Say _node n_ is searching for _file f_. Then it will XOR $ID_n \bigoplus ID_f$, and the location of the most significant bit, tells which _k-bucket_ to contact. Contacting a node in that bucket, will get the node closer to the destination. The node I the bucket will then again XOR to get even closer and so on.
+
+~~Det kan maksimalt være 160 k buckets~~
