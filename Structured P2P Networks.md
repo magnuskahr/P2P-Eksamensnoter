@@ -4,6 +4,11 @@
 
 ## Motivation
 ## Structured networks
+
+But firstly, what do we mean by a structured network?
+
+Structured P2P networks maintains a Distributed Hash Table  and allows each peer to be responsible for a specific part of the content in the network. These networks use hash functions and assign values to every content and every peer in the network and then follow a global protocol in determining which peer is responsible for which content. This way, whenever a peer wants to search for some data, it uses the global protocol to determine the peer(s) responsible for the data and then directs the search towards the responsible peer(s).
+
 ## Chord
 
 Lets start by talking about _Chord_.
@@ -111,6 +116,7 @@ Next we will be looking a _Kademlia_, which had a breakthrough I networking, by 
 
 Kademlia is built like a binary tree structure - which in itself is the routing table. All identifiers er 160 bit long, found randomly or by SHA1. Each node is then a leaf on the tree, positioned as the shortest unique prefix of its id.
 
+### K-Buckets 
 Each node contains a list of what is called _k-buckets_. A node will have a _k-bucket_ for every bit up from its unique prefix. That is, going up in the tree, from the node itself, each time it can go down along a different path, that tree will be called a bucket, and in that (sub)tree, the node will know _k_ of the given nodes in it. If it is known that nodes that have been connected for a long time in a network will probably remain connected for a long time in the future. Because of this statistical distribution, Kademlia selects long connected nodes to remain stored in the k-buckets. 
 
 ![](k2bucket.png)
@@ -121,6 +127,50 @@ The further away a bucket is located from a node, the higher the number is given
 
 ![](k2bucketNaming.png)
 
-Why is that important you ask? Well, it is at lookup time. Say _node n_ is searching for _file f_. Then it will XOR $ID_n \bigoplus ID_f$, and the location of the most significant bit, tells which _k-bucket_ to contact. Contacting a node in that bucket, will get the node closer to the destination. The node I the bucket will then again XOR to get even closer and so on.
+Why is that important you ask? Well, it is at lookup time. Say _node n_ is searching for _file f_. Then it will XOR $ID_n \bigoplus ID_f$, and the location of the most significant bit, tells which _k-bucket_ to contact. Contacting a node in that bucket, will get node _n_ closer to the destination. The node in the bucket will return _k_ closest nodes it knows of, which will then be contacted.
 
 ~~Det kan maksimalt være 160 k buckets~~
+
+And by means of these _k-buckets_ and XOR operation, the network implements _find-value_ and _find-node_. But this is an, relatively, awful lot of communication back and forth ... cant we utilise it somehow? Well, im glad you asked!
+
+### Updating K-Buckets
+
+The essence of Kademlia and why it is better than both Pastry and Chord, is due, partly, to the updates of the _k-bucket_.
+
+Upon receiving a new message from a node, the given _k-bucket_ I belongs to is identified, of course by XORing the identifier with the identifier of itself. Then one of the following thins happen.
+
+> * `If in bucket, move to tail` If the node is already in the bucket, move it to the tail.
+> * `Bucket not full, insert at tail`  If the bucket is not filled up, move the node the the tail of the bucket
+> * `Bucket full, least recently unresponsive, replace at tail` but what if the bucket is full? Well, we contact the least seen node, and if it appears unresponsive, we replace it with the new node at the tail
+> * `} else { bail out }` and if non of these things are possible, we simple bail out and ignore storing the node
+
+In this way, the different buckets are populated, and maintained to prefer older nodes. An implementation detail, could be to keep new members in a cache if there is no room to spare in the buckets.
+
+### Parallelism
+
+Okay great, so lets boil it down.
+
+When a node _n_ contacts some nodes from a bucket, it happens in parralism. That means, that when the node _n_ receives another nodes _k-bucket_ it can choose to contact those which it got first. To keep latency down!
+
+Because of this, and those structures which we have been discussing, we are ensured locality and the strength of the nodes.
+
+### Joining
+
+Lets briefly discuss joining the network. Well because that is a pretty important part of making it all work.
+
+> * `Calc ID` so, you start by calculating your id
+> * `locate peer in network` then you somehow locate a peer in the network
+> * `add to bucket` and add that node, to the appropriate bucket
+> * `FIND_NODE on own ID` doing FIND NODE on its own ID, ensures that the new now communicates with a lot of different nodes in the network and gains some buckets
+> * `FIND_NODE random ID’s in buckets` lastly we perform a FIND_NODE on some random ids in the buckets, as a way to publish the arrival of the new node in their buckets.
+
+So with Kademlia, we have an network which is:
+
+* Built on the experiences from earlier structured networks
+* It ensures high performance through parallelism 
+* All traffic contributes to routing table upkeep 
+* In widest use of all structured networks
+
+
+
+
