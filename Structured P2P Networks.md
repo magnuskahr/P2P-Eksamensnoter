@@ -3,9 +3,13 @@
 {{TOC}}
 
 ## Motivation
-## Structured networks
 
-But firstly, what do we mean by a structured network?
+* Routing information must be distributed – no central index 
+* How is the routing information created and maintained?
+* How are peers inserted into the network? How do they leave? How are resources added?
+
+
+## Structured networks
 
 Structured P2P networks maintains a Distributed Hash Table  and allows each peer to be responsible for a specific part of the content in the network. These networks use hash functions and assign values to every content and every peer in the network and then follow a global protocol in determining which peer is responsible for which content. This way, whenever a peer wants to search for some data, it uses the global protocol to determine the peer(s) responsible for the data and then directs the search towards the responsible peer(s).
 
