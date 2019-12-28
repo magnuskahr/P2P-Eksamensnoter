@@ -81,7 +81,7 @@ Enter, Tarzan!
 
 #### Tarzan
 
-Tarzan is a Peer-to-Peer anonymous network overlay, where every peer is also a mixer. Being that it is a P2P network, it can contains thousand of peers, making it practically impossible to block them all; thus that wont be a problem any more.
+The tarzan system is a decentralized, distributed onion system that enables client applications to seamlessly direct traffic through an anonymous network at the transport layer. Users can direct their traffic into a tunnel through the network peers, so the packets exiting the tunnel cannot be traced back to the original sender, even in the face of substantial networkwide traffic analysis. Being that it is a P2P network, it can contains thousand of peers, making it practically impossible to block them all; thus that wont be a problem any more.
 
 > * **Tarzan goals**
 > * `P2P, all are mixer`
@@ -97,11 +97,79 @@ To join a tarzan network, one peer retrieves a list of peers from a known peer. 
 > * Repeat
 > * Profit
 
-Peer to peer system can serve disparate functions, and although many of them primarily act as applications or services, they can slo serve as transport-layer anonymises. The tarzan system is a decentralized, distributed chairman mix system that enables client applications to seamlessly direct traffic through an anonymous network at the transport layer.Unlike a centralised server-based anonymous traffic system such as Anonymizer, Tarzens P2P nature ensures that no one actor needs to be trusted for anonymous communication at the AP level. Users can direct their traffic into a tunnel through the network peers, so the packets exiting the tunnel cannot be traced back to the original sender, even in the face of substantial networkwide traffic analysis.
+From these peers, the new node select a set to act as mimics, which it will exchange a constant rate of encrypted cover traffic of fixed size packets with.
 
-Tarzan, as described by freedman and Morris, works as follows. Each node select, from what it can see of the network, a set of peers to act as mimics. Initial node discovery and subsequent network maintenance is based on a gossip model, where nodes share their view of the network. Mimics are selected randomly from the available nodes for security and balance, in some verifiable manner. Each node exchanges a constant rate of cover traffic of fixed-size packets with its mimics using symmetric encryption. Symmetric keys are distributed using the relays public keys. Actual data can now be interwoven into the cover traffic without an observer detecting where a message originates. To build a path, the sending node randomly select a given number of mimics and wraps the message in an onion of symmetric keys from each node on the oath. The sender passes the packet - outwardly indistinguishable from cover traffic - to the first node in the chain, which removes the outermost wrapper with its private key, and then send it along to the next node. With the exception of the last node, each node in the chain is aware of the node before and after it in the chain, but has no way of telling where it is in the chain itself. That is, the node cannot tell if it is the first hop or the penultimate hop. The final node in the chain of mimics acts as the network address translator for the transport layer and sends the packet to its final destination through the internet. This final node must know the content and destination but has no information about the sender.
-Nodes store a record for the return path, so a reply from the web host contacted can be received by the final node in the chain, reqrapped with its private key, and sent back to the penultimate hop. The message is then passed back through the chain, with each node adding another layer of encryption. The originating node can use the public keys of each node to unwrap the layers and read the message. Because it is the only node to know the public keys of each hop along the path, the content is secure.
-The P2P nature of this system makes a network decentralized and thus highly scalable. The presence of cover traffic and the fact that all nodes are peers means that no actor inside or outside the system can readily identify the originator of the message. Unlike onion routing, the sender does not have to trust the first hop, and the list of available nodes can be dynamically maintained for participant flexibility. Moreover, the majority of cryptographic work is performed by the orignial sender, which must decrypt _n_ public keys to read the reply through and and _n_-node chain. Each node in the chain only performs one encryption or decryption, and implementations result have shown that the computational time is dominated by the expected latency of the underlaying internet.
+Now, whenever a node needs to send actual data, it can be interwoven within the cover traffic, without an observer detecting where a message originates.
+
+Data wraps the message by encrypting it in layers to several of its mimics, and passes it on to the first in the chain, which is only able to remove the outermost wrapper with its private key and then pass it along to the next node. Just as with before.
+
+Nodes store a record for the return to, so when a reply comes, they each rewrap it with their own private key; and since the original node is the only one that knows the path he is also the only one who knows which public keys to use to decrypt the returning message.
+
+Is this way, Tarzan makes it hard to block all mixers and do to the constant cover traffic, it is also hard to analyse the traffic to guess what is going on.
 
 ## Secure DHT
+
+Structured P2P networks have through out time proven to be a stable, trustworthy and reliable way to do things, but are there any downsides when we begin to talk about security?
+
+Well sure!
+
+> * **Downside of DHT**
+> * `deterministic routing` you can calculate up front how a routing could go
+> * `id determines position` since ones ID determines the position in the network, it is easily to be taken out or be the subject to an eclipse attack
+> * `value at closest key` and last, since a value are kept at a node with the closest key, it sure is “easy” to find
+
+### Kademlia
+
+Kademlia is properly one of the most widely structured p2p networks in use, why it is an interesting system to be able to attack, and hence to secure.
+
+> * **Kademlia**
+> * `uses 160 bit ids`
+> * `XOR navigate key space` XORing two keys gives the rough distance of a jump one has to take in Kademlia at routing
+> * `k-buckets` routing is based on k-buckets, which is a way to  divide the network into ever larger segments
+
+Lets quickly take an example of such buckets.
+
+![](k2bucket.png)
+
+In each k-buckets, a node only knows _k_ of the nodes at a time in that part of the network. And as there is a bucket for every different bit going up the tree, we will know less and less of the network the further away we are.
+
+Now whenever we need to route, we XOR the destination with our own key, and the placement of the significant bit tells how many k-buckets away we should look. We will then contact the peers from the given k-bucket, and ask them for the _k_ closest nodes it knows, which we then will contact, and so on until we find our destination.  
+
+Kademlia prefers to have longliving peers in its k-buckets, only ever changing them out when they become unresponsive. This is a brilliant design choice of the system, where a Sybil attack becomes hard to fulfil. One cannot just spawn an army of peers and join the network to corrupt it, since older peers are preferred.
+
+But still, be do have some weaknesses: the routing can be deterministic, sybils can saturate the network, and eclipse peers can collude to produce poor routing.
+
 ### S/Kademlia
+
+S/Kademlia seeks to solve this by:
+
+> * **S/Kademlia**
+> * `Expensive NodeID gen` They make the system more secure, by making joining more expensive
+> * Sibling broadcast
+> * Disjoint paths
+> * Signatures on messages
+
+The signatures is done using public and private keys, and ones id is a hash of the public key. To make the nodded generation expensive, one could implement one of two different crypto puzzles.
+
+> * `Static: generate key so that the _c1_ first bits of H(H(key)) = 0` generating a key such that the _c1_ first bits of the double hash equals zero, makes it very hard to decide ones own id.
+> * Dynamic: 
+
+Id = hash of public key
+
+Generating keys:
+
+* central authority
+	* can co-sign peers certificates
+	* can control/limit the growth of Sybil’s
+	* but it is centralised...
+* crypto-puzzle
+	* computationally expensive
+	* decentralised
+	* this is how it is done
+	* generate key so that the _c1_ first bits of H(H(key)) = 0
+		* Så derfor kan H(key) ikke bare vælges
+	* or generate X so that _c2_ first bits of H(key xor X) = 0
+		* increase c2 over time
+
+
+
