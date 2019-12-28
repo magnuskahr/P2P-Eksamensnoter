@@ -135,9 +135,9 @@ In each k-buckets, a node only knows _k_ of the nodes at a time in that part of 
 
 Now whenever we need to route, we XOR the destination with our own key, and the placement of the significant bit tells how many k-buckets away we should look. We will then contact the peers from the given k-bucket, and ask them for the _k_ closest nodes it knows, which we then will contact, and so on until we find our destination.  
 
-Kademlia prefers to have longliving peers in its k-buckets, only ever changing them out when they become unresponsive. This is a brilliant design choice of the system, where a Sybil attack becomes hard to fulfil. One cannot just spawn an army of peers and join the network to corrupt it, since older peers are preferred.
+Kademlia prefers to have longliving peers in its k-buckets, and only ever changes them when they become unresponsive. This is a brilliant design choice of the system, where a Sybil attack becomes hard to fulfil. One cannot just spawn an army of peers and join the network to corrupt it, since older peers are preferred.
 
-But still, be do have some weaknesses: the routing can be deterministic, sybils can saturate the network, and eclipse peers can collude to produce poor routing.
+But still, be do have some weaknesses: the routing can be deterministic, sybils can saturate the network though, and eclipse peers can collude to produce poor routing.
 
 ### S/Kademlia
 
@@ -145,31 +145,54 @@ S/Kademlia seeks to solve this by:
 
 > * **S/Kademlia**
 > * `Expensive NodeID gen` They make the system more secure, by making joining more expensive
-> * Sibling broadcast
-> * Disjoint paths
-> * Signatures on messages
+> * ~~`Sibling broadcast` it uses sibling broadcast .. noget med at filer også ligger som kopier i leaf-set~~
+> * `Disjoint paths` it uses disjoint paths
+> * `Signatures on messages` and lastly, messages are signed
 
-The signatures is done using public and private keys, and ones id is a hash of the public key. To make the nodded generation expensive, one could implement one of two different crypto puzzles.
+Making it expensive to generate nodeId, is a way to make S/Kademlia resistant to Sybil and Eclipse attacks. Such expense is empowered by making it difficult to generate many nodes, and impossible to choose node IDs respectively.
 
-> * `Static: generate key so that the _c1_ first bits of H(H(key)) = 0` generating a key such that the _c1_ first bits of the double hash equals zero, makes it very hard to decide ones own id.
-> * Dynamic: 
+This can be done using a centralised certificate authority or by using cryptographic puzzles to generate nodeIds. 
 
-Id = hash of public key
+At the beginning of the network, when it is small, S/Kademlia proposes using the certificate authority method.
 
-Generating keys:
+But, lets talk about the cryptographic puzzles, which work by mathematically making nodeId generation difficult, so that it takes many tries to successfully generate a node ID. 
+S/Kademlia uses two crypto puzzles, the first is a static one to make it hard to choose node IDs near a target.
+Lets see why by some pseudo code!
 
-* central authority
-	* can co-sign peers certificates
-	* can control/limit the growth of Sybil’s
-	* but it is centralised...
-* crypto-puzzle
-	* computationally expensive
-	* decentralised
-	* this is how it is done
-	* generate key so that the _c1_ first bits of H(H(key)) = 0
-		* Så derfor kan H(key) ikke bare vælges
-	* or generate X so that _c2_ first bits of H(key xor X) = 0
-		* increase c2 over time
+```
+while true { // in a loop
+	pk, sk = gen() // we generate key pairs
+	p = H(H(pk)) // and we double hash the public
+	if first c1 bits in p == 0 { // if the first c1 bits equals 0
+		return pk, sk // we have found our key pair!
+	}
+}
+```
+
+Being that it is the double hash that needs to satisfy some requirement, and our nodeId is a single hash, we make it hard to target an ID.
+
+The dynamic puzzle to make it hard to generate many node IDs, because it needs to find a special number with a property. 
+```
+nodeId = H(pk) // generate our nodeId
+while true { // in a loop
+	X = random() // make a random number
+	p = H(nodeId ⊕ X) 
+	if first c2 bits in p == 0 {
+		return nodeId, X
+	}
+}
+```
+And now we have the keys, the nodeid, and the last peace of the puzzle, the number X which proves the node went through a lot of work to find it.
+
+Then, when a peer being added has found these numbers, it sends the public key, node ID, and random number X to the current node, and the current node can verify that it used the puzzles in O(1) time.
+
+A sufficiently powerful adversary could still generate many node IDs, even though it is computationally expensive. The difficulty of solving the puzzles could be tuned very high by increasing c1 and c2, but then regular users would not have the computational power to generate a node ID.
+
+Having now introduced keys to the system, every message should be signed, and if they aren’t, they should be ignored.
+
+Lastly, S/Kademlia tries to use a larger portion of the network, by issuing quires over _d_ disjoint paths, to make it harder for possible malicious peers to affect the routing.
+
+
 
 
 
