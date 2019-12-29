@@ -184,7 +184,7 @@ while true { // in a loop
 ```
 And now we have the keys, the nodeid, and the last peace of the puzzle, the number X which proves the node went through a lot of work to find it.
 
-Then, when a peer being added has found these numbers, it sends the public key, node ID, and random number X to the current node, and the current node can verify that it used the puzzles in O(1) time.
+Then, when a peer being added has found these numbers, it sends the public key, node ID, and random number X to the current node, and the current node can verify that it used the puzzles in O(1) time. The same goes for when sending signed messages.
 
 A sufficiently powerful adversary could still generate many node IDs, even though it is computationally expensive. The difficulty of solving the puzzles could be tuned very high by increasing c1 and c2, but then regular users would not have the computational power to generate a node ID.
 
