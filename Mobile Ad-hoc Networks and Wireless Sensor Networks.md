@@ -166,7 +166,7 @@ But we could also use other strategies, like if a node retrieves temperatures fr
 
 * Sink send queries
 
-In a wireless sensor network, it is also possible for the sink to request data from nodes which measures some specific data, like temperatures higher than 20 degrees. This could possible lower transmissions a lot.
+In ordinary MANET, we might request resource held by specific node, but in a wireless sensor network, it is also possible for the sink to request data from nodes which measures some specific data, like temperatures higher than 20 degrees. This could possible lower transmissions a lot.
 
 * Nodes annonce new data
 
