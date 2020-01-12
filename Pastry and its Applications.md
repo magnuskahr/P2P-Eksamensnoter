@@ -26,14 +26,14 @@ The routing table is created based on a _prefix matching_ metric to different su
 > * Prefix matching
 > * `O(log(n))` routing can be done in O(logn) time!
 
-Say that we have a peer with ID *1010*, it will then maintain routing table with the some peers with an id matching the following sequence
+Say that we have a peer with ID *1010*, it will then maintain routing table with the some peers with an id matching the following sequence, each being the closest to the peer proximity wise
 
 * *
 * 1*
 * 10*
 * 101*
 
-At lookup time, if the id falls within the leafset, the job is done, otherwise, the routing table will be used, and lookup will be propagated to the entry with the largest matching prefix, thereby taking locality into account in the ID space.
+At lookup time, if the id falls within the leafset, the job is done, otherwise, the routing table will be used, and lookup will be propagated to the entry with the largest matching prefix, thereby taking locality into account.
 
 ### Joining
 
@@ -45,7 +45,7 @@ Locality is of course something that needs to be maintained, especially doing jo
 * `All returns state` All nodes en-route to Z returns their state to X
 * `neighbourhood set of A` X takes nabos of A
 * `leaf set of Z` leaf set is based on leaf set of Z (since Z has nodeId closest to nodeId of X)
-* `routing table from others` routing table from returned states
+* `routing table from others` routing table from returned states, here it picks the ones which is closest to it from the neighborsets
 * * `X sends its state` to all the nodes mentioned in its leaf set, routing table, and neighbour list
 
 
