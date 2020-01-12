@@ -33,10 +33,10 @@ Okay so routing in a mobile adhoc network.. that sound hard..
 There are to ways to route in a MANET, where the routing either can be proactive or reactive.
 
 > * **Proactive**
-> `Routing table` In a proactive routing environment, each node knows the network which is laid out in a routing table
-> `Route changes` therefor, some bandwidth and energy will also be used to maintain route tables when they change, like if a node is moved
-> `Low latency` but that it does know the difference routes, makes the proactive approach have low latency
-> `Control overhead` but it is at a cost of high control overhead by maintaining and keep updating the routing table
+> * `Routing table` In a proactive routing environment, each node knows the network which is laid out in a routing table
+> * `Route changes` therefor, some bandwidth and energy will also be used to maintain route tables when they change, like if a node is moved
+> * `Low latency` but that it does know the difference routes, makes the proactive approach have low latency
+> * `Control overhead` but it is at a cost of high control overhead by maintaining and keep updating the routing table
 
 > * **Reactive**
 > * `(almost) No state` each node contains no state, or close to, meaning that they only keep what is necessary
@@ -68,8 +68,8 @@ Adhoc Ondemand Distance Vector is another protocol, which is reactive this time.
 > * **AODV**
 > * Reactive
 > * `no routing table` and there has no routing table!
-> * `route request` when a route is needed, a route request is broadcasted into the network, which each other node will propagate 
-> * `route response` when the request comes to the destination or a node that knows it, a _route response_ is send back using the reverse path. It does helped by every node which remembers a broadcastId from the request, which now will begin to remember to path.
+> * `route request` when a route is needed, a route request is broadcasted into the network, which other nodes will propagate 
+> * `route response` when the request comes to the destination or a node that knows it, a _route response_ is send back using the reverse path. It works by every node remembers a broadcastId from the request, which now will begin to remember to path.
 > * `destination sequence number` such a response contains a sequence number, so if multiple respones comes back, the peer will use the route with the highest number
 
 In AODV link failures are handled by also marking it at a $\infty$ cost, propagated to a peers nabos which uses the route. Now whenever a route to the node is needed again, it will be discovered using a higher sequence number.

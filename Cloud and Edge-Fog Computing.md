@@ -52,7 +52,7 @@ The Internet of Things often relies on clouds and servers doing a bunch of stuff
 
 Adding edge and cloud computing to already existing IoT products, would be able to move the work of many things, out into more specialised nodes. This distribution of the work load for IoT, could make it easier to scale just the right sections of a product as needed.
 
-But as we have argued, introducing such layers into product, also makes the architecture harder to understand and work with; so how do one program for such things?
+But introducing such layers into product, also makes the architecture harder to understand and work with; so how do one program for such things?
 
 ### Interfaces
 

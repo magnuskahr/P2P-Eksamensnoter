@@ -52,9 +52,11 @@ In the range `1 <= i <= m`, the table of node _n_ will reference the successors 
 
 Well it is simply, the sequence: 1, 2, 4, 8, 16, 32 ... and so on.
 
+Then we will know the node which is the first bigger than each of the identifiers.
+
 ![](ChordNonLinear.png)
 	
-Now at looktime time, if the successor does not contain the file, the lookup will be propagated to the largest node in the finger table, which has an id smaller than that of the file.
+Now at looktime time, if the successor does not contain the file, the lookup will be propagated to the first node having a larger id than the file.
 
 Thereby, now we have lookup as an `O(log(n))` operation, and to prevent failures, each node will keep its successors table, to be able to rebuild the system.
 
