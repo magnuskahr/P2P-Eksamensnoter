@@ -2,11 +2,6 @@
 
 {{TOC}}
 
-~~Using *link state* each peer periodically sender deres naboer, deres pris for linket, deres ID og sådan, og så ved man altid hvordan man router til den billigste. Det er dyrt at gøre sådan, kræver en del trafik~~
-
-~~Der er også noget der hedder en distance vector, tror det er noget med at noder deler deres priser for at route til andre steder; og så kan en node via andre noder finde den billigste ting.~~
-
-## Motivation
 ## Ad-Hoc networking
 
 Ad hoc networking is the idea of enabling radio connected devices to collaborate with each other without having to rely on a centralised station.
@@ -17,9 +12,9 @@ Doing such thing, encounters a number of challenges.
 > * `limited devices` these devices are often limited in range, bandwith, cpu, storage or battery life - making it necessary to take such limitations into account
 > * `portable` well guess what, portable devices are .. portable! They move around! And that is also important to think about
 
-Also being that it typically is radio waves which is used, that itself brings some problems, where signal strength can be unpredictable, radio waves can be blocked or absorbed, radio communication can be unidirectional where a can hear b, but b cant hear a, and broadcasting in itself can be a security risk.
+And using radio, the signal strength can be unpredictable, waves can be blocked or absorbed communication can be unidirectional where a can hear b, but b cant hear a, and broadcasting in itself can be a security risk.
 
-It is clear that working with these technologies brings a lot of problems with it, but what they enable can be used for remote areas, unplanned meetings, to extend existing infrastructure, emergency situations, military, sensor networks and so on.
+So yeah, this really hard thing to work with.
 
 ## MANET routing
 
@@ -27,12 +22,9 @@ Okay so routing in a mobile adhoc network.. that sound hard..
 
 ### Goals
 
-For mobile adhoc network protocols, we have some goals which they should adhere to.
-
 > * **Goals**
-> * `minimal overhead` being that it is mobile and often weak devices, we have finite power resources and protocols should respect that.
-> * `minimal processing overhead` this is also why processing should be kept at a minimum, since processing takes power and power is limited and cpu typically also are. Simple routes are therefor great, where complex graphs dont need to be calculated.
-> * `Multi hop routing` often we could end in a situation where need send something to a peer, but we cant communicate directly with it, so we need to do multiple hops to get there.
+> * `minimal overhead` being that it is mobile and often weak devices, we have finite power resources and protocols should respect that with minimal overhead.
+> * `Multi hop routing` if we cant communicate directly with a peer, it should support multi hop routing
 > * `dynamic topology` being that mobile devices is mobile, that can move. So protocols must be flexible in the topology of the networks.
 > * `loop prevention` and lastly, having a loop really just is a waste of time, why the protocol should prevent this.
 
@@ -48,7 +40,7 @@ There are to ways to route in a MANET, where the routing either can be proactive
 
 > * **Reactive**
 > * `(almost) No state` each node contains no state, or close to, meaning that they only keep what is necessary
-> * `route on demand` therefor, routes are discovered on demand, when a message is needed to be sent, but is remembered though. If a remmebered route is broken, it needs to discovery a new again on demand.
+> * `route on demand` therefor, routes are discovered on demand, but is remembered though.
 > * `routing = costly` when suddenly a routing is needed, it is more costly though, because energy is needed for discovery. 
 
 ### Protocols
@@ -57,7 +49,7 @@ Great to lets look at a few different protocols!
 
 #### DSDV
 
-Destination Sequence Distance Vector. Is a great name, am I right? It is the first protocol we are gonna look at though, and it is proactive!
+So the first: Destination Sequence Distance Vector is proactive!
 
 > * **DSDV**
 > * Proactive
@@ -82,31 +74,11 @@ Adhoc Ondemand Distance Vector is another protocol, which is reactive this time.
 
 In AODV link failures are handled by also marking it at a $\infty$ cost, propagated to a peers nabos which uses the route. Now whenever a route to the node is needed again, it will be discovered using a higher sequence number.
 
-* properties
-	* cheaper only maintained active routes
-	* small, simple table lookups, comparing numbers etc
-	* functions well in low traffic
-	* in high traffic, the initial cost can be high
-
-
-#### DSR
-
-And just for fun, lets get a quick overview of yet another reactive protocol, called Dynamic Source Routing.
-
-> * **DSR**
-> * Reactive
-> * `request and replies` it too uses request and replies, but in a very different way, where the intermediate nodes wont remember anything from it
-> * `Request builds path` when the request is broadcaster, it is modified to keep the path in itself. Meaning that it start by containing A, then AB, then ABC and such
-> * `replies` if the network is bidirectional, the reply can simply go through the reverse path, but is it unidirectional, the destination can simple send a request against the source, and in that message let the request-path piggyback to prevent loop.
-> * `radio geared` Here it is shown that it truly is a radio-geared protocol because it supports being unidirectional. Also it can con
-* ~~if memory is available, it can store the routes now if it has multiple to the same, if one breaks, it has a backup~~
-
-
 ### Energy Efficient
 
 Lets briefly discuss how MONATs could be more energy efficient.
 
-We could implement some power control, where we adjust what the cost metric is measured on, to measure the power consumption instead of f.x. hops. Therefor, we could end up in routes that are longer, but will use less power to transmit. It could also be, that these routes allow for the transmission range to be downgraded again to control the power usage.
+We could use routes that are longer, but will use less power to transmit. It could also be, that these routes allow for the transmission range to be downscaled to control the power usage.
 
 > * **Power Control**
 > * longer, cheaper paths
@@ -135,7 +107,7 @@ It is a field of sensor, made up of many small, cheap and limited nodes. Their o
 
 ### Routing 
 
-Now, all this routing where the transmission will occur will become costly, so its need to be node right. Lets go trough four strategies, which each are all possible to use and is field specific.
+Now, all this routing where the transmission will occur will become costly, so its need to be done right.
 
 > * **Maximum PA route**
 > * `Route with most PA` the first strategy could be to use the route with the most power available. This could be so nodes almost out of energy wont be used.
@@ -151,28 +123,6 @@ Now, all this routing where the transmission will occur will become costly, so i
 
 Again, what strategy to use, is case specific.
 
-### Data aggregation
-
-Imagine if each recording had to be sent trough the network, well again - that is a lot of messages that need to be sent. So when a node receives a message from another sensor, it could wait a while to collect several more measurements as long as it would be able to fit within a single package, and combine them all. Thereby, we minimise the amount of packages sent.
-
-> * **Data**
-> * Combine
-
-But we could also use other strategies, like if a node retrieves temperatures from its neighbours, instead of sending them all, the network could also be designed to work on averages, why the node only would send a single average measurement towards the sink.
-
-> * average
-
-### Data centric routing
-
-* Sink send queries
-
-In ordinary MANET, we might request resource held by specific node, but in a wireless sensor network, it is also possible for the sink to request data from nodes which measures some specific data, like temperatures higher than 20 degrees. This could possible lower transmissions a lot.
-
-* Nodes annonce new data
-
-But it can also be, that nodes instead of just sending the new data constantly, the advertise that they have new data, and if interested they can be asked to deliver it.
-
-So yeah, we have seen now, that in the field of MANETS there are a lot of challenges.
 
 
 
